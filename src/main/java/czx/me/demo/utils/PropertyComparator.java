@@ -1,0 +1,55 @@
+/**
+ * Copyright 2010-2017 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package czx.me.demo.utils;
+
+import org.springframework.expression.Expression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+
+import java.util.Comparator;
+
+public class PropertyComparator<T> implements Comparator<T> {
+	private final static SpelExpressionParser parser = new SpelExpressionParser();
+
+	private final Expression readPropertyExpression;
+
+	public PropertyComparator(String property) {
+		this.readPropertyExpression = parser.parseExpression(property);
+	}
+
+	@SuppressWarnings({ "unchecked", "null" })
+	@Override
+	public int compare(T o1, T o2) {
+		Object left = this.readPropertyExpression.getValue(o1);
+		Object right = this.readPropertyExpression.getValue(o2);
+
+		if (left == right) {
+			return 0;
+		}
+		if (left == null) {
+			return -1;
+		}
+		if (right == null) {
+			return 1;
+		}
+
+		if (left instanceof String) {
+			return ((String) left).compareToIgnoreCase((String) right);
+		}
+
+		return ((Comparable<Object>) left).compareTo(right);
+	}
+
+}
